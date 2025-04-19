@@ -97,7 +97,10 @@ class PythonDumper:
         elif self.category == "CL":
             return DCKeyword.clsend in method.keywords
         else:
-            return True
+            return (
+                DCKeyword.clsend not in method.keywords
+                and DCKeyword.ownsend not in method.keywords
+            )
 
     def canReceive(self, method: DistributedMethod):
         if self.category == "OV":
@@ -172,7 +175,10 @@ class PythonDumper:
             for i, x in enumerate(method.parameters)
         )
         return "\n".join(
-            ["@abc.abstractmethod", f"def {method.name}(self, {args}) -> object: ..."]
+            [
+                "@abc.abstractmethod",
+                f"def {method.name}(self, {args}, /) -> object: ...",
+            ]
         )
 
     def dump_getter(self, method: DistributedMethod):

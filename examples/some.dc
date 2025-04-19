@@ -1,0 +1,7 @@
+from examples import SomeDclass/AI
+
+dclass SomeDclass {
+    magicMethod(int8, int8) airecv clsend;
+    secondMethod(string) airecv clsend;
+    magicResponse(blob) broadcast;
+};
