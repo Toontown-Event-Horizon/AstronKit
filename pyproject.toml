@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Wizzerinus", email = "quillinde@gmail.com" }]
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 dependencies = ["panda3d", "types-panda3d"]
 
 [build-system]
@@ -13,7 +13,7 @@ build-backend = "hatchling.build"
 
 [tool.pyright]
 ignore = []
-pythonVersion = "3.9"
+pythonVersion = "3.8"
 
 reportExplicitAny = false
 reportAny = false

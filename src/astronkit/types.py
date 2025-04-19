@@ -1,10 +1,10 @@
 import dataclasses
 from enum import Enum
-from typing import Literal, Protocol, Union
+from typing import List, Literal, Protocol, Set, Tuple, Union
 
 
 class Dumper(Protocol):
-    target_version: tuple[int, int]
+    target_version: Tuple[int, int]
 
     def add_symbol(self, sym: str): ...
 
@@ -67,22 +67,22 @@ class DCParameter:
 @dataclasses.dataclass(frozen=True)
 class DistributedMethod:
     name: str
-    parameters: list[DCParameter]
-    keywords: list[DCKeyword]
+    parameters: List[DCParameter]
+    keywords: List[DCKeyword]
 
 
 @dataclasses.dataclass(frozen=True)
 class DistributedClass:
     name: str
-    superclasses: list["DistributedClass"]
-    visibility: set[Literal["AI", "CL", "OV", "UD"]]
-    fields: list[DistributedMethod]
+    superclasses: List["DistributedClass"]
+    visibility: Set[Literal["AI", "CL", "OV", "UD"]]
+    fields: List[DistributedMethod]
 
 
 @dataclasses.dataclass(frozen=True)
 class DistributedStruct:
     name: str
-    fields: list[DCParameter]
+    fields: List[DCParameter]
 
     def dump(self, _dumper: Dumper):
         return '"' + self.name + 'T"'
@@ -90,5 +90,5 @@ class DistributedStruct:
 
 @dataclasses.dataclass(frozen=True)
 class DistributedFileDef:
-    classes: list[DistributedClass]
-    structs: list[DistributedStruct]
+    classes: List[DistributedClass]
+    structs: List[DistributedStruct]

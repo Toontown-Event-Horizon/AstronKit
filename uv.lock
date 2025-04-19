@@ -1,6 +1,6 @@
 version = 1
 revision = 1
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 
 [[package]]
 name = "astronkit"
@@ -54,6 +54,14 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/ca/99/4f385683203646e81ad25f1ff880c7d46b2e1843b580bbbeb5a6643ca22d/panda3d-1.10.15-cp313-cp313t-manylinux2014_x86_64.whl", hash = "sha256:db8ad9ff7f48ee1d6b67716124aa8201aa49a92f95b58bb99822208bfbd32a8e", size = 54799011 },
     { url = "https://files.pythonhosted.org/packages/40/3e/fde3f06eb2843d9dc4b5cca2ef82888928849215deaeece6ca4be442e1cb/panda3d-1.10.15-cp313-cp313t-win32.whl", hash = "sha256:09f4a52918faa54f53fc523f2f0be84789cbf0432cc380960d8e3e8437b48021", size = 54826671 },
     { url = "https://files.pythonhosted.org/packages/1c/f7/318a80225b6785a562b00622db5f7fb2b1f76ab57723908051d1f953d33d/panda3d-1.10.15-cp313-cp313t-win_amd64.whl", hash = "sha256:fa195f2b57a6dd819e81bf13728d00f3973cf4c680245c70d7b669a3317decca", size = 66300865 },
+    { url = "https://files.pythonhosted.org/packages/b6/64/9a33eae9861e0c2cd78d5b625a4ddc6efc9ac2f4df3af9fddfc19f738623/panda3d-1.10.15-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:6ce60a39b7249ff4fa03fd704fd4934e768639dd4b754a841204de183eb25ce5", size = 65854562 },
+    { url = "https://files.pythonhosted.org/packages/30/33/d13872f1d7abf0ee539d0b5b813b257378512561b5c52eb8e7beb264ae4b/panda3d-1.10.15-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:532f1f4ea85b1fbb5af13d77bba7a99cd1d157d5de307b1b2cdcbc4e8f79c826", size = 115478985 },
+    { url = "https://files.pythonhosted.org/packages/1e/08/22e6be4db5f3483026c3e923eac82114c96ed8f22ec3a0261bedb647e35b/panda3d-1.10.15-cp38-cp38-manylinux1_i686.whl", hash = "sha256:8ea4cced21fff64355162b523153b7756056232a2b8382f70801b6d6e33c8305", size = 51644021 },
+    { url = "https://files.pythonhosted.org/packages/e9/b0/e6826c3bc58c0185992f12a7d7d2eab313480fdc657d5c36a794b44bdb53/panda3d-1.10.15-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:388702782b5888b13b0f856fbc5b28eee538435f0340c238e8757201110a4ed7", size = 54267941 },
+    { url = "https://files.pythonhosted.org/packages/c0/ff/4c249d33b462cc9c6117f58f6f185194ef6c8c318866c832fe24bb35e974/panda3d-1.10.15-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:9eda66670fd4e35ba8ced0360499f9395011ea557d5ee45b676be4fabc2ed0e4", size = 47860039 },
+    { url = "https://files.pythonhosted.org/packages/ae/dd/556dba3374c8c968dd4586a27f5cd75949f5d1bab0fdcfd16a1678fe55e5/panda3d-1.10.15-cp38-cp38-manylinux2014_x86_64.whl", hash = "sha256:b7cab2fa557da65f04a465223f5b4aa2622fb21ed9db8332ba6fb02fdee9098a", size = 53254003 },
+    { url = "https://files.pythonhosted.org/packages/7c/32/7d16f2ecb0d308bcdbd2b198c10aa90447313e901877698f650603688414/panda3d-1.10.15-cp38-cp38-win32.whl", hash = "sha256:7d3a097db7ceb44b232cd0207528c60cb908ba59280876fe1484c3b3798be7c2", size = 52210581 },
+    { url = "https://files.pythonhosted.org/packages/ce/cc/c6937151bbc5a881f7c15b1d5a4d963386fc2e58c132de23a09016016a84/panda3d-1.10.15-cp38-cp38-win_amd64.whl", hash = "sha256:0f3fbe55fd8230554f38bce9805b0735055e489ab641274c9a6a4d592dd94404", size = 63238251 },
     { url = "https://files.pythonhosted.org/packages/23/e2/313972c1b1ac0bb124fd670829404e3870e47bf4d4219b07d790d275b570/panda3d-1.10.15-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:ad6cc64718ec849aeb50829e85808e7c5315808262309a9370f928408a193f27", size = 66013712 },
     { url = "https://files.pythonhosted.org/packages/5e/0e/42bdd5a5dcd4d988174c23dd5fa7f0372815da77f622be2a83e58e666029/panda3d-1.10.15-cp39-cp39-macosx_11_0_universal2.whl", hash = "sha256:875bc42fdf4ee6c8a797dc04d7bbbecab691aa3e38f4f0ad0262090ce51fa315", size = 115932911 },
     { url = "https://files.pythonhosted.org/packages/f8/11/0d6f956b20046fb73206741c85058c9b538b004988fa503e6e471a5efd18/panda3d-1.10.15-cp39-cp39-manylinux1_i686.whl", hash = "sha256:4732d038c9bb234353bb85fbd21c5b0b281fa0424e9dacef92513d5155760900", size = 51859550 },

@@ -1,6 +1,6 @@
 from collections.abc import Collection
 import pathlib
-from typing import Literal, Union
+from typing import List, Literal, Set, Union
 from astronkit.types import (
     DCKeyword,
     DCParameter,
@@ -47,8 +47,6 @@ subatomic_to_dctypes = {
     types.ST_uint32uint8array: DistributedArray(uint32uint8),
 }
 
-typedef_cache: dict[str, DistributedType] = {}
-
 
 def parse_type(param: types.DCParameter) -> DistributedType:
     if struct := param.as_class_parameter():
@@ -67,7 +65,7 @@ def parse_type(param: types.DCParameter) -> DistributedType:
         )
 
 
-def parse_param(dcfield: DCField) -> list[DCParameter]:
+def parse_param(dcfield: DCField) -> List[DCParameter]:
     parameters: list[DCParameter] = []
     if atomic := dcfield.as_atomic_field():
         for i in range(atomic.get_num_elements()):
@@ -114,7 +112,7 @@ def parse_class(classnames: Collection[str], dcclass: DCClass) -> DistributedCla
     for i in range(dcclass.get_num_fields()):
         fields.append(parse_method(dcclass.get_field(i)))
 
-    visibility = set[Literal["AI", "OV", "UD", "CL"]]()
+    visibility: Set[Literal["AI", "OV", "UD", "CL"]] = set()
     if dcclass.get_name() + "AI" in classnames:
         visibility.add("AI")
     if dcclass.get_name() + "UD" in classnames:
@@ -134,7 +132,7 @@ def parse_class(classnames: Collection[str], dcclass: DCClass) -> DistributedCla
 def parse_dcfile(dcfile: DCFile) -> DistributedFileDef:
     classes: list[DistributedClass] = []
     structs: list[DistributedStruct] = []
-    classnames = set[str]()
+    classnames: Set[str] = set()
 
     for i in range(dcfile.get_num_import_modules()):
         for j in range(dcfile.get_num_import_symbols(i)):

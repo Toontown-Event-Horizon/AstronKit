@@ -1,5 +1,5 @@
 from textwrap import indent
-from typing import Literal
+from typing import List, Literal, Tuple
 from astronkit.types import (
     DCKeyword,
     DistributedClass,
@@ -11,7 +11,7 @@ from astronkit.types import (
 
 class PythonDumper:
     def __init__(
-        self, target_version: tuple[int, int], category: Literal["CL", "OV", "AI", "UD"]
+        self, target_version: Tuple[int, int], category: Literal["CL", "OV", "AI", "UD"]
     ) -> None:
         self.category: Literal["CL", "OV", "AI", "UD"] = category
         self.appendix = {"CL": "", "OV": "", "AI": "AI", "UD": "UD"}[category]
@@ -25,7 +25,7 @@ class PythonDumper:
 
     def dump_methods(
         self, obj: DistributedClass, only_sendUpdates: bool = False
-    ) -> tuple[int, list[str]]:
+    ) -> Tuple[int, List[str]]:
         rows: list[str] = []
         sendUpdate_count = 0
         for method in obj.fields:
