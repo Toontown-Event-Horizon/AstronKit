@@ -1,5 +1,5 @@
 from textwrap import indent
-from typing import List, Literal, Tuple
+from typing import List, Literal, Optional, Tuple
 from astronkit.types import (
     DCKeyword,
     DistributedClass,
@@ -24,15 +24,17 @@ class PythonDumper:
         self.symbols.add(sym)
 
     def dump_methods(
-        self, obj: DistributedClass, only_sendUpdates: bool = False
-    ) -> Tuple[int, List[str]]:
-        rows: list[str] = []
-        sendUpdate_count = 0
+        self,
+        obj: DistributedClass,
+        overloads: Optional[List[Tuple[str, str]]] = None,
+        only_sendUpdates: bool = False,
+    ) -> Tuple[List[str], List[Tuple[str, str]]]:
+        if overloads is None:
+            overloads = []
+        rows: List[str] = []
         for method in obj.fields:
             if self.canSend(method):
-                cnt, dumped_sendUpdate = self.dump_sendUpdate_overload(method)
-                rows.append(indent(dumped_sendUpdate, " " * 4))
-                sendUpdate_count += cnt
+                self.dump_sendUpdate_overload(method, overloads)
 
             if not only_sendUpdates:
                 if DCKeyword.required in method.keywords and self.category == "AI":
@@ -42,12 +44,83 @@ class PythonDumper:
                     rows.append(indent(self.dump_receiver(method), " " * 4))
 
         for sc in obj.superclasses:
-            sendUpdate_count_inside, methods = self.dump_methods(
-                sc, only_sendUpdates=True
+            _ = self.dump_methods(sc, overloads, only_sendUpdates=True)
+        return rows, overloads
+
+    def make_method(
+        self, key: str, args: str, ellipsis: bool, no_overload: bool
+    ) -> List[str]:
+        out: List[str] = []
+
+        if not args:
+            argsIn = argsOut = ""
+        else:
+            argsIn = ", value: " + args
+            argsOut = ", value"
+
+        if no_overload:
+            key = "str"
+            argsIn = ", value: object = None"
+            argsOut = ", value"
+        else:
+            self.symbols.add("typing.Literal")
+            key = f'Literal["{key}"]'
+        out.extend(
+            [
+                "@overload",
+                f"def sendUpdate(self, field: {key}{argsIn}, /):",
+                "    ..."
+                if ellipsis
+                else " " * 4 + f"{self.superclass}.sendUpdate(self, field{argsOut})",
+            ]
+        )
+        if self.category in ("AI", "UD"):
+            out.extend(
+                [
+                    "@overload",
+                    f"def sendUpdateToAvatarId(self, avId: int, field: {key}{argsIn}, /):",
+                    "    ..."
+                    if ellipsis
+                    else " " * 4
+                    + f"{self.superclass}.sendUpdateToAvatarId(self, avId, field{argsOut})",
+                ]
             )
-            sendUpdate_count += sendUpdate_count_inside
-            rows = methods + rows
-        return sendUpdate_count, rows
+            out.extend(
+                [
+                    "@overload",
+                    f"def sendUpdateToAccountId(self, avId: int, field: {key}{argsIn}, /):",
+                    "    ..."
+                    if ellipsis
+                    else " " * 4
+                    + f"{self.superclass}.sendUpdateToAccountId(self, avId, field{argsOut})",
+                ]
+            )
+
+        return out
+
+    def make_methods(self, overloads: List[Tuple[str, str]]) -> str:
+        lines: List[str] = []
+        if len(overloads) == 1:
+            methods = self.make_method(
+                overloads[0][0], overloads[0][1], ellipsis=False, no_overload=False
+            )
+            methods = [m for m in methods if "@overload" not in m]
+            lines = methods
+        else:
+            self.add_symbol("typing.overload")
+            for key, args in overloads:
+                lines.extend(
+                    self.make_method(key, args, ellipsis=True, no_overload=False)
+                )
+            lines.extend(
+                [
+                    m
+                    for m in self.make_method("", "", ellipsis=False, no_overload=True)
+                    if "@overload" not in m
+                ]
+            )
+
+        return "\n".join(lines)
 
     def dump_class(self, obj: DistributedClass) -> str:
         self.add_symbol("abc")
@@ -58,30 +131,9 @@ class PythonDumper:
         ]
         rows = [f"class Stub{obj.name + self.appendix}({', '.join(superclasses)}):"]
 
-        sendUpdate_count, methods = self.dump_methods(obj)
-        if sendUpdate_count == 1:
-            rows += [r.replace("    @overload\n", "") for r in methods]
-        elif sendUpdate_count > 1:
-            rows += methods
-            rows.append(
-                indent(
-                    "def sendUpdate(self, _field: str, _args: object = None, /) -> None: ...",
-                    " " * 4,
-                )
-            )
-            rows.append(
-                indent(
-                    "def sendUpdateToAvatarId(self, _av: int, _field: str, _args: object = None, /) -> None: ...",
-                    " " * 4,
-                )
-            )
-            rows.append(
-                indent(
-                    "def sendUpdateToAccountId(self, _acct: int, _field: str, _args: object = None, /) -> None: ...",
-                    " " * 4,
-                )
-            )
-        elif not methods:
+        methods, sendUpdate_overloads = self.dump_methods(obj)
+        methods.append(indent(self.make_methods(sendUpdate_overloads), " " * 4))
+        if not methods:
             rows.append("    pass")
         else:
             rows += methods
@@ -126,47 +178,18 @@ class PythonDumper:
         else:
             return "tuple"
 
-    def dump_sendUpdate_overload(self, method: DistributedMethod):
-        if self.target_version < (3, 11):
-            self.add_symbol("typing_extensions.overload")
-        else:
-            self.add_symbol("typing.overload")
+    def make_supercall(self, method: str, arg_names: List[str]):
+        return f"return {self.superclass}.{method}({', '.join(['self'] + arg_names)})"
 
-        self.add_symbol("typing.Literal")
+    def dump_sendUpdate_overload(
+        self, method: DistributedMethod, overloads: List[Tuple[str, str]]
+    ):
         args = ", ".join(x.type.dump(self) for x in method.parameters)
         if not args:
-            return 2, "\n".join(
-                [
-                    "@overload",
-                    f'def sendUpdate(self, _field: Literal["{method.name}"], /) -> None: ...',
-                    "@overload",
-                    f'def sendUpdateToAvatarId(self, _av: int, _field: Literal["{method.name}"], /) -> None: ...',
-                    "@overload",
-                    f'def sendUpdateToAccountId(self, _acct: int, _field: Literal["{method.name}"], /) -> None: ...',
-                    "@overload",
-                    f'def sendUpdate(self, _field: Literal["{method.name}"], '
-                    f"_args: {self.get_tuple_id()}[()], /) -> None: ...",
-                    "@overload",
-                    f'def sendUpdateToAvatarId(self, _av: int, _field: Literal["{method.name}"], '
-                    f"_args: {self.get_tuple_id()}[()], /) -> None: ...",
-                    "@overload",
-                    f'def sendUpdateToAccountId(self, _acct: int, _field: Literal["{method.name}"], '
-                    f"_args: {self.get_tuple_id()}[()], /) -> None: ...",
-                ]
-            )
-        return 1, "\n".join(
-            [
-                "@overload",
-                f'def sendUpdate(self, _field: Literal["{method.name}"], '
-                f"_args: {self.get_tuple_id()}[{args}], /) -> None: ...",
-                "@overload",
-                f'def sendUpdateToAvatarId(self, _av: int, _field: Literal["{method.name}"], '
-                f"_args: {self.get_tuple_id()}[{args}], /) -> None: ...",
-                "@overload",
-                f'def sendUpdateToAccountId(self, _acct: int, _field: Literal["{method.name}"], '
-                f"_args: {self.get_tuple_id()}[{args}], /) -> None: ...",
-            ]
-        )
+            overloads.append((method.name, ""))
+            overloads.append((method.name, f"{self.get_tuple_id()}[()]"))
+        else:
+            overloads.append((method.name, f"{self.get_tuple_id()}[{args}]"))
 
     def dump_receiver(self, method: DistributedMethod):
         self.add_symbol("abc")
