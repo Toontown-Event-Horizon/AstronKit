@@ -273,12 +273,10 @@ class PythonDumper:
         )
 
     def dump_struct(self, obj: DistributedStruct) -> str:
-        options: List[str] = []
-        for i in range(len(obj.fields) + 1):
-            if all(x.has_default for x in obj.fields[i:]):
-                options.append(self.make_option(obj.fields[:i], False))
-
-        return f"{obj.name}T = {self.make_union(options)}\n{obj.name}TIn = {self.make_option(obj.fields, True)}"
+        return (
+            f"{obj.name}T = {self.make_option(obj.fields, False)}\n"
+            f"{obj.name}TIn = {self.make_option(obj.fields, True)}"
+        )
 
     def make_union(self, options: List[str]) -> str:
         assert options
