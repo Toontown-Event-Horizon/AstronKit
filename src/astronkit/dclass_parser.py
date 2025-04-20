@@ -135,7 +135,7 @@ def parse_class(classnames: Collection[str], dcclass: DCClass) -> DistributedCla
     return DistributedClass(dcclass.get_name(), parents, visibility, fields)
 
 
-def parse_dcfile(dcfile: DCFile) -> DistributedFileDef:
+def parse_dcfile(dcfile: DCFile, exclusions: Collection[str]) -> DistributedFileDef:
     classes: list[DistributedClass] = []
     structs: list[DistributedStruct] = []
     classnames: Set[str] = set()
@@ -155,6 +155,12 @@ def parse_dcfile(dcfile: DCFile) -> DistributedFileDef:
 
     # Make sure that superclasses are in the OV file, mainly
     classes_dict = {x.name: x for x in classes}
+    for e in exclusions:
+        if (suffix := e[-2:]) in ("OV", "AI", "UD"):
+            e = e[:-2]
+        else:
+            suffix = "CL"
+        classes_dict[e].visibility.discard(suffix)
     for f in classes:
         for g in f.superclasses:
             classes_dict[g.name].visibility.update(f.visibility)
@@ -162,9 +168,11 @@ def parse_dcfile(dcfile: DCFile) -> DistributedFileDef:
     return DistributedFileDef(list(classes_dict.values()), structs)
 
 
-def parse_dcfiles(dcfiles: Collection[Union[str, pathlib.Path]]) -> DistributedFileDef:
+def parse_dcfiles(
+    dcfiles: Collection[Union[str, pathlib.Path]], exclusions: Collection[str]
+) -> DistributedFileDef:
     dcfile = DCFile()
     for f in dcfiles:
         if not dcfile.read(f):
             raise ValueError(f"Unable to read dcfile: {f}")
-    return parse_dcfile(dcfile)
+    return parse_dcfile(dcfile, exclusions)
