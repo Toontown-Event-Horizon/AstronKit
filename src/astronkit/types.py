@@ -22,11 +22,11 @@ class DistributedTypeVanilla(Enum):
     string = "str"
     blob = "bytes"
     largeblob = "bytes"
-    bool = "bool"
+    bool_ = "bool"
     char = "str"
     null = "None"
 
-    def dump(self, _dumper: Dumper) -> str:
+    def dump(self, _dumper: Dumper, _is_input: bool) -> str:
         return self.value
 
 
@@ -46,12 +46,19 @@ class DistributedArray:
     type: "DistributedType"
     size: int = -1
 
-    def dump(self, dumper: Dumper) -> str:
+    def dump(self, dumper: Dumper, is_input: bool) -> str:
+        if is_input:
+            if dumper.target_version < (3, 9):
+                dumper.add_symbol("typing.List")
+                return "List[" + self.type.dump(dumper, is_input) + "]"
+            else:
+                return "list[" + self.type.dump(dumper, is_input) + "]"
+
         if dumper.target_version < (3, 9):
-            dumper.add_symbol("typing.List")
-            return "List[" + self.type.dump(dumper) + "]"
+            dumper.add_symbol("typing.Sequence")
         else:
-            return "list[" + self.type.dump(dumper) + "]"
+            dumper.add_symbol("collections.abc.Sequence")
+        return "Sequence[" + self.type.dump(dumper, is_input) + "]"
 
 
 DistributedType = Union[DistributedTypeVanilla, "DistributedStruct", DistributedArray]
@@ -84,7 +91,9 @@ class DistributedStruct:
     name: str
     fields: List[DCParameter]
 
-    def dump(self, _dumper: Dumper):
+    def dump(self, _dumper: Dumper, is_input: bool):
+        if is_input:
+            return '"' + self.name + 'TIn"'
         return '"' + self.name + 'T"'
 
 

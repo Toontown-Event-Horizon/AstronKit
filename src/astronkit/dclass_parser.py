@@ -56,8 +56,14 @@ def parse_type(param: types.DCParameter) -> DistributedType:
             parse_type(array.get_element_type()), array.get_array_size()
         )
     elif simple := param.as_simple_parameter():
+        if (typedef := simple.get_typedef()) and "bool" in typedef.get_name():
+            # Corner case: bools are commonly typedef'd and it's nicer to allow bool inputs,
+            # even though it's slightly less typesafe but it makes APIs better
+            return DistributedTypeVanilla.bool_
         if simple.get_type() == types.ST_invalid:
             raise ValueError(f"Parameter {param} is invalid!")
+        if simple.get_divisor() > 1:
+            return DistributedTypeVanilla.double
         return subatomic_to_dctypes[simple.get_type()]
     else:
         raise ValueError(

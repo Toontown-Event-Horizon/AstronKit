@@ -1,7 +1,7 @@
 [project]
 name = "astronkit"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.1.1"
+description = "Strongly typed Astron calls"
 readme = "README.md"
 authors = [{ name = "Wizzerinus", email = "quillinde@gmail.com" }]
 requires-python = ">=3.8"
