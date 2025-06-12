@@ -1,6 +1,6 @@
 [project]
 name = "astronkit"
-version = "0.1.1"
+version = "0.1.2"
 description = "Strongly typed Astron calls"
 readme = "README.md"
 authors = [{ name = "Wizzerinus", email = "quillinde@gmail.com" }]

@@ -1,5 +1,6 @@
 from textwrap import indent
 from typing import List, Literal, Optional, Tuple
+
 from astronkit.types import (
     DCKeyword,
     DCParameter,
@@ -186,13 +187,16 @@ class PythonDumper:
         }:
             return False
 
-        if self.category == "OV":
-            return (
-                DCKeyword.broadcast in method.keywords
-                or DCKeyword.ownrecv in method.keywords
+        if self.category == "OV" and DCKeyword.ownrecv in method.keywords:
+            return True
+        if self.category in ("CL", "OV"):
+            # If there's no UD, most messages can be sent to all users
+            # through sendUpdateToAvatarId
+            return DCKeyword.broadcast in method.keywords or (
+                "UD" not in cls.visibility
+                and DCKeyword.airecv not in method.keywords
+                and DCKeyword.ownrecv not in method.keywords
             )
-        elif self.category == "CL":
-            return DCKeyword.broadcast in method.keywords
         elif self.category == "AI":
             return DCKeyword.airecv in method.keywords
         else:
