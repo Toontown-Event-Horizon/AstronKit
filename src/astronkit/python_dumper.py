@@ -13,7 +13,10 @@ from astronkit.types import (
 
 class PythonDumper:
     def __init__(
-        self, target_version: Tuple[int, int], category: Literal["CL", "OV", "AI", "UD"]
+        self,
+        target_version: Tuple[int, int],
+        category: Literal["CL", "OV", "AI", "UD"],
+        distributed_package: str,
     ) -> None:
         self.category: Literal["CL", "OV", "AI", "UD"] = category
         self.appendix = {"CL": "", "OV": "OV", "AI": "AI", "UD": "UD"}[category]
@@ -23,6 +26,7 @@ class PythonDumper:
 
         self.target_version = target_version
         self.symbols: set[str] = set()
+        self.distributed_package = distributed_package
 
     def add_symbol(self, sym: str):
         self.symbols.add(sym)
@@ -136,7 +140,9 @@ class PythonDumper:
 
     def dump_class(self, obj: DistributedClass) -> str:
         self.add_symbol("abc")
-        self.add_symbol("direct.distributed." + self.superclass + "." + self.superclass)
+        self.add_symbol(
+            f"{self.distributed_package}." + self.superclass + "." + self.superclass
+        )
         ovSuperclass: List[str] = []
         if self.category == "OV":
             self.add_symbol(f".AstronStubsCL.Stub{obj.name}")
